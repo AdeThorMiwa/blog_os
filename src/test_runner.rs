@@ -2,7 +2,7 @@ use core::panic::PanicInfo;
 
 use crate::{
     exits::{exit_qemu, QemuExitCode},
-    serial_print, serial_println,
+    hlt_loop, serial_print, serial_println,
 };
 
 pub trait Testable {
