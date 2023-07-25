@@ -4,22 +4,33 @@
 #![test_runner(blog_os::test_runner)]
 #![reexport_test_harness_main = "test_main"]
 
-use blog_os::println;
+use blog_os::{memory::active_level_4_table, println};
 use bootloader::{entry_point, BootInfo};
 use core::panic::PanicInfo;
+use x86_64::{structures::paging::PageTable, VirtAddr};
 
 #[no_mangle] // don't mangle the name of this function
 fn kernel_main(boot_info: &'static BootInfo) -> ! {
     println!("Hello World{}", "!");
     blog_os::init();
 
-    use x86_64::registers::control::Cr3;
+    let phys_mem_offset = VirtAddr::new(boot_info.physical_memory_offset);
+    let level_4_table = unsafe { active_level_4_table(phys_mem_offset) };
 
-    let (level_4_page_table, _) = Cr3::read();
-    println!(
-        "Level 4 page table at: {:?}",
-        level_4_page_table.start_address()
-    );
+    for (i, entry) in level_4_table.iter().enumerate() {
+        if !entry.is_unused() {
+            println!("L4 Entry {}: {:?}", i, entry);
+
+            let phys = entry.frame().unwrap().start_address();
+            let virt = phys.as_u64() + boot_info.physical_memory_offset;
+            let ptr = VirtAddr::new(virt).as_mut_ptr();
+            let l3_table: &PageTable = unsafe { &*ptr };
+
+            for (i, entry) in l3_table.iter().enumerate() {
+                println!("L3 Entry {}: {:?}", i, entry);
+            }
+        }
+    }
 
     #[cfg(test)]
     test_main();

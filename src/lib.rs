@@ -8,6 +8,7 @@
 pub mod exits;
 pub mod gdt;
 pub mod interrupts;
+pub mod memory;
 pub mod serial;
 pub mod test_runner;
 pub mod vga_buffer;
