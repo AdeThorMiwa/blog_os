@@ -1,7 +1,7 @@
 #![no_std]
 #![no_main]
 
-use blog_os::{exit_qemu, serial_print, serial_println, QemuExitCode};
+use blog_os::{exits::{ exit_qemu, QemuExitCode}, serial_print, serial_println };
 use core::panic::PanicInfo;
 
 #[no_mangle]
